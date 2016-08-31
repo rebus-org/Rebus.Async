@@ -1,0 +1,35 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stuff", "stuff", "{1ABDD7C1-1F8D-402D-8692-3E4B66962DE0}"
+	ProjectSection(SolutionItems) = preProject
+		CHANGELOG.md = CHANGELOG.md
+		CONTRIBUTING.md = CONTRIBUTING.md
+		LICENSE.md = LICENSE.md
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rebus.Async", "Rebus.Async\Rebus.Async.csproj", "{206BFBFD-DD80-4BAC-A50A-CAEE097DA9AD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rebus.Async.Tests", "Rebus.Async.Tests\Rebus.Async.Tests.csproj", "{029A88C4-9350-497E-8EE8-B6965C7D7A90}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{206BFBFD-DD80-4BAC-A50A-CAEE097DA9AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{206BFBFD-DD80-4BAC-A50A-CAEE097DA9AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{206BFBFD-DD80-4BAC-A50A-CAEE097DA9AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{206BFBFD-DD80-4BAC-A50A-CAEE097DA9AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{029A88C4-9350-497E-8EE8-B6965C7D7A90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{029A88C4-9350-497E-8EE8-B6965C7D7A90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{029A88C4-9350-497E-8EE8-B6965C7D7A90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{029A88C4-9350-497E-8EE8-B6965C7D7A90}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Rebus.Async</name>
+    </assembly>
+    <members>
+        <member name="T:Rebus.Async.AsyncBusExtensions">
+            <summary>
+            Configuration and bus extepsions for enabling async/await-based request/reply
+            </summary>
+        </member>
+        <member name="M:Rebus.Async.AsyncBusExtensions.EnableSynchronousRequestReply(Rebus.Config.OptionsConfigurer,System.Int32)">
+            <summary>
+            Enables async/await-based request/reply whereby a request can be sent using the <see cref="M:Rebus.Async.AsyncBusExtensions.SendRequest``1(Rebus.Bus.IBus,System.Object,System.Nullable{System.TimeSpan})"/> method
+            which can be awaited for a corresponding reply.
+            </summary>
+        </member>
+        <member name="M:Rebus.Async.AsyncBusExtensions.SendRequest``1(Rebus.Bus.IBus,System.Object,System.Nullable{System.TimeSpan})">
+            <summary>
+            Extension method on <see cref="T:Rebus.Bus.IBus"/> that allows for asynchronously sending a request and dispatching
+            the received reply to the continuation.
+            </summary>
+            <typeparam name="TReply">Specifies the expected type of the reply. Can be any type compatible with the actually received reply</typeparam>
+            <param name="bus">The bus instance to use to send the request</param>
+            <param name="request">The request message</param>
+            <param name="timeout">Optionally specifies the max time to wait for a reply. If this time is exceeded, a <see cref="T:System.TimeoutException"/> is thrown</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
