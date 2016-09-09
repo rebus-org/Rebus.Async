@@ -33,8 +33,8 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Rebus, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rebus.2.0.0-a11\lib\NET45\Rebus.dll</HintPath>
+    <Reference Include="Rebus, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rebus.2.0.0-b02\lib\NET45\Rebus.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -49,12 +49,12 @@
   <ItemGroup>
     <Compile Include="AsyncBusExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo_Patch.cs" />
+    <None Include="packages.config" />
     <None Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReplyHandlerStep.cs" />
     <Compile Include="TimedMessage.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="Rebus.Async.nuspec">
       <SubType>Designer</SubType>
     </None>
