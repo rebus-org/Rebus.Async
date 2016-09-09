@@ -16,7 +16,6 @@ _ReSharper.*
 *.suo
 *.cache
 ~$*
-sqs_connectionstring.txt
 .vs
 .vs/*
 _NCrunch_*
@@ -26,3 +25,4 @@ _NCrunch_*
 # MS Guideline
 **/packages/*
 !**/packages/build/
+AssemblyInfo_Patch.cs
