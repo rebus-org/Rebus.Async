@@ -1,5 +1,7 @@
 # Rebus.Async
 
+[![install from nuget](https://img.shields.io/nuget/v/Rebus.Async.svg?style=flat-square)](https://www.nuget.org/packages/Rebus.Async)
+
 Provides an experimental async extension to Rebus that allows for emulating synchronous request/reply in an asyncronous fashion.
 
 Check this out:
