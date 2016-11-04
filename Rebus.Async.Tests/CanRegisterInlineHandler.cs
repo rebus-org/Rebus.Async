@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Rebus.Activation;
@@ -72,6 +75,35 @@ namespace Rebus.Async.Tests
             Console.WriteLine(timeoutException);
 
             Assert.That(timeoutException.Message, Contains.Substring(correlationIdOfRequest));
+        }
+
+        [Test]
+        public async Task CanPassHeadersAlongWithRequest()
+        {
+            var receivedHeaders = new ConcurrentQueue<KeyValuePair<string, string>>();
+
+            _activator.Handle<SomeRequest>(async (bus, context, request) =>
+            {
+                foreach (var kvp in context.Headers)
+                {
+                    receivedHeaders.Enqueue(kvp);
+                }
+
+                await bus.Reply(new SomeReply());
+            });
+
+            const string customHeaderKey = "x-custom-header";
+            const string customHeaderValue = "it works!";
+
+            var optionalHeaders = new Dictionary<string, string> { { customHeaderKey, customHeaderValue } };
+
+            await _bus.SendRequest<SomeReply>(new SomeRequest(), optionalHeaders);
+
+            var dictionary = receivedHeaders.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            Assert.That(dictionary, Contains.Key(customHeaderKey));
+            Assert.That(dictionary[customHeaderKey], Is.EqualTo(customHeaderValue), 
+                $"Did not find key-value-pair {customHeaderKey}={customHeaderValue} among the received headers");
         }
 
         public class SomeRequest { }
