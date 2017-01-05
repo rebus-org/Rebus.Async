@@ -20,9 +20,13 @@ namespace Rebus.Async
 
         public ReplyHandlerStep(ConcurrentDictionary<string, TimedMessage> messages, IRebusLoggerFactory rebusLoggerFactory, IAsyncTaskFactory asyncTaskFactory, TimeSpan replyMaxAge)
         {
+            if (messages == null) throw new ArgumentNullException(nameof(messages));
+            if (rebusLoggerFactory == null) throw new ArgumentNullException(nameof(rebusLoggerFactory));
+            if (asyncTaskFactory == null) throw new ArgumentNullException(nameof(asyncTaskFactory));
+
             _messages = messages;
             _replyMaxAge = replyMaxAge;
-            _log = rebusLoggerFactory.GetCurrentClassLogger();
+            _log = rebusLoggerFactory.GetLogger<ReplyHandlerStep>();
             _cleanupTask = asyncTaskFactory.Create("CleanupAbandonedRepliesTask", CleanupAbandonedReplies);
         }
 
