@@ -13,7 +13,7 @@ namespace Rebus.Config
     public static class AsyncConfigurationExtensions
     {
         /// <summary>
-        /// Enables async/await-based request/reply whereby a request can be sent using the <see cref="SendRequest{TReply}"/> method
+        /// Enables async/await-based request/reply whereby a request can be sent using the <see cref="AsyncBusExtensions.SendRequest{TReply}"/> method
         /// which can be awaited for a corresponding reply.
         /// </summary>
         public static void EnableSynchronousRequestReply(this OptionsConfigurer configurer, int replyMaxAgeSeconds = 10)
