@@ -3,46 +3,18 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Rebus.Async;
 using Rebus.Bus;
-using Rebus.Config;
-using Rebus.Logging;
 using Rebus.Messages;
-using Rebus.Pipeline;
-using Rebus.Pipeline.Receive;
-using Rebus.Threading;
 
-namespace Rebus.Async
+namespace Rebus
 {
     /// <summary>
     /// Configuration and bus extepsions for enabling async/await-based request/reply
     /// </summary>
     public static class AsyncBusExtensions
     {
-        static readonly ConcurrentDictionary<string, TimedMessage> Messages = new ConcurrentDictionary<string, TimedMessage>();
-
-        /// <summary>
-        /// Enables async/await-based request/reply whereby a request can be sent using the <see cref="SendRequest{TReply}"/> method
-        /// which can be awaited for a corresponding reply.
-        /// </summary>
-        public static void EnableSynchronousRequestReply(this OptionsConfigurer configurer, int replyMaxAgeSeconds = 10)
-        {
-            configurer.Register(c =>
-            {
-                var rebusLoggerFactory = c.Get<IRebusLoggerFactory>();
-                var asyncTaskFactory = c.Get<IAsyncTaskFactory>();
-                var replyMaxAge = TimeSpan.FromSeconds(replyMaxAgeSeconds);
-                var step = new ReplyHandlerStep(Messages, rebusLoggerFactory, asyncTaskFactory, replyMaxAge);
-                return step;
-            });
-
-            configurer.Decorate<IPipeline>(c =>
-            {
-                var pipeline = c.Get<IPipeline>();
-                var step = c.Get<ReplyHandlerStep>();
-                return new PipelineStepInjector(pipeline)
-                    .OnReceive(step, PipelineRelativePosition.Before, typeof(ActivateHandlersStep));
-            });
-        }
+        internal static readonly ConcurrentDictionary<string, TimedMessage> Messages = new ConcurrentDictionary<string, TimedMessage>();
 
         /// <summary>
         /// Extension method on <see cref="IBus"/> that allows for asynchronously sending a request and dispatching
