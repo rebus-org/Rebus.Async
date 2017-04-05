@@ -21,7 +21,7 @@
 
 * Update to Rebus 3
 
-## 5.0.0-b01
+## 5.0.0-b02
 
 * Update to Rebus 4
 * Add .NET Core support
