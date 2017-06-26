@@ -2,10 +2,13 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Rebus.Async;
 using Rebus.Bus;
 using Rebus.Messages;
+#pragma warning disable 4014
 
 namespace Rebus
 {
@@ -29,12 +32,11 @@ namespace Rebus
         public static async Task<TReply> SendRequest<TReply>(this IBus bus, object request, Dictionary<string, string> optionalHeaders = null, TimeSpan? timeout = null)
         {
             var maxWaitTime = timeout ?? TimeSpan.FromSeconds(5);
-            var correlationId = $"{ReplyHandlerStep.SpecialCorrelationIdPrefix}:{Guid.NewGuid()}";
+            var messageId = $"{ReplyHandlerStep.SpecialMessageIdPrefix}:{Guid.NewGuid()}";
 
             var headers = new Dictionary<string, string>
             {
-                {Headers.CorrelationId, correlationId},
-                {ReplyHandlerStep.SpecialRequestTag, "request"}
+                {Headers.MessageId, messageId},
             };
 
             if (optionalHeaders != null)
@@ -47,26 +49,34 @@ namespace Rebus
                     }
                     catch (Exception exception)
                     {
-                        throw new ArgumentException($"Could not add key-value-pair {kvp.Key}={kvp.Value} to headers", exception);
+                        var headersString = string.Join(", ", headers.Select(k => $"{k.Key}={k.Value}"));
+
+                        throw new ArgumentException(
+                            $"Could not add key-value-pair {kvp.Key}={kvp.Value} to headers because the key was already taken: {headersString}",
+                            exception);
                     }
                 }
             }
 
-            var stopwatch = Stopwatch.StartNew();
+            var timedOut = false;
+
+            Task.Run(async () =>
+            {
+                await Task.Delay(maxWaitTime);
+                Volatile.Write(ref timedOut, true);
+            });
 
             await bus.Send(request, headers);
 
             TimedMessage reply;
 
-            while (!Messages.TryRemove(correlationId, out reply))
+            while (!Messages.TryRemove(messageId, out reply))
             {
-                var elapsed = stopwatch.Elapsed;
-
                 await Task.Delay(10);
-
-                if (elapsed > maxWaitTime)
+                
+                if (Volatile.Read(ref timedOut))
                 {
-                    throw new TimeoutException($"Did not receive reply for request with correlation ID '{correlationId}' within {maxWaitTime} timeout");
+                    throw new TimeoutException($"Did not receive reply for request with in-reply-to ID '{messageId}' within {maxWaitTime} timeout");
                 }
             }
 

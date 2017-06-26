@@ -18,6 +18,14 @@ namespace Rebus.Config
         /// </summary>
         public static void EnableSynchronousRequestReply(this OptionsConfigurer configurer, int replyMaxAgeSeconds = 10)
         {
+            if (configurer == null) throw new ArgumentNullException(nameof(configurer));
+
+            if (replyMaxAgeSeconds <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(replyMaxAgeSeconds), replyMaxAgeSeconds, 
+                    "Please supply a positive value for the max age of a reply (i.e. how long to keep a reply until we give up on returning it)");
+            }
+            
             configurer.Register(c =>
             {
                 var rebusLoggerFactory = c.Get<IRebusLoggerFactory>();

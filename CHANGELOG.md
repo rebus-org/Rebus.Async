@@ -21,8 +21,9 @@
 
 * Update to Rebus 3
 
-## 5.0.0-b03
+## 5.0.0-b04
 
 * Update to Rebus 4
 * Add .NET Core support
-* Update deps to b10
+* Update deps to b14
+* Change reply correlation method to be reliable by basing it on the new `rbs2-in-reply-to` header

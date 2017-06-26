@@ -11,6 +11,7 @@ using Rebus.Threading;
 
 namespace Rebus.Async
 {
+    [StepDocumentation("Handles replies to requests sent with bus.SendRequest")]
     class ReplyHandlerStep : IIncomingStep, IInitializable, IDisposable
     {
         readonly ConcurrentDictionary<string, TimedMessage> _messages;
@@ -20,39 +21,27 @@ namespace Rebus.Async
 
         public ReplyHandlerStep(ConcurrentDictionary<string, TimedMessage> messages, IRebusLoggerFactory rebusLoggerFactory, IAsyncTaskFactory asyncTaskFactory, TimeSpan replyMaxAge)
         {
-            if (messages == null) throw new ArgumentNullException(nameof(messages));
-            if (rebusLoggerFactory == null) throw new ArgumentNullException(nameof(rebusLoggerFactory));
-            if (asyncTaskFactory == null) throw new ArgumentNullException(nameof(asyncTaskFactory));
-
-            _messages = messages;
+            _messages = messages ?? throw new ArgumentNullException(nameof(messages));
+            _log = rebusLoggerFactory?.GetLogger<ReplyHandlerStep>() ?? throw new ArgumentNullException(nameof(rebusLoggerFactory));
+            _cleanupTask = asyncTaskFactory?.Create("CleanupAbandonedRepliesTask", CleanupAbandonedReplies) ?? throw new ArgumentNullException(nameof(asyncTaskFactory));
             _replyMaxAge = replyMaxAge;
-            _log = rebusLoggerFactory.GetLogger<ReplyHandlerStep>();
-            _cleanupTask = asyncTaskFactory.Create("CleanupAbandonedRepliesTask", CleanupAbandonedReplies);
         }
 
-        public const string SpecialCorrelationIdPrefix = "request-reply";
-
-        public const string SpecialRequestTag = "request-tag";
+        public const string SpecialMessageIdPrefix = "request-reply";
 
         public async Task Process(IncomingStepContext context, Func<Task> next)
         {
             var message = context.Load<Message>();
 
-            string correlationId;
-
-            var hasCorrelationId = message.Headers.TryGetValue(Headers.CorrelationId, out correlationId);
-            if (hasCorrelationId)
+            var hasInReplyToHeader = message.Headers.TryGetValue(Headers.InReplyTo, out var inReplyToMessageId);
+            if (hasInReplyToHeader)
             {
-                var isRequestReplyCorrelationId = correlationId.StartsWith(SpecialCorrelationIdPrefix);
+                var isRequestReplyCorrelationId = inReplyToMessageId.StartsWith(SpecialMessageIdPrefix);
                 if (isRequestReplyCorrelationId)
                 {
-                    var isRequest = message.Headers.ContainsKey(SpecialRequestTag);
-                    if (!isRequest)
-                    {
-                        // it's the reply!
-                        _messages[correlationId] = new TimedMessage(message);
-                        return;
-                    }
+                    // it's the reply!
+                    _messages[inReplyToMessageId] = new TimedMessage(message);
+                    return;
                 }
             }
 
