@@ -5,7 +5,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Rebus.Async.Tests</RootNamespace>
     <AssemblyName>Rebus.Async.Tests</AssemblyName>
-    <TargetFrameworks>net45;netstandard1.6</TargetFrameworks>
+    <TargetFrameworks>net45;netstandard1.3</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -29,13 +29,13 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <DefineConstants>NET45</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
     <DefineConstants>NETSTANDARD1_6</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rebus.Async\Rebus.Async.csproj" />
-    <PackageReference Include="nunit" Version="3.6.1" />
-    <PackageReference Include="rebus" Version="4.0.0-b15" />
-    <PackageReference Include="rebus.tests.contracts" Version="4.0.0-b10" />
+    <PackageReference Include="nunit" Version="3.7.1" />
+    <PackageReference Include="rebus" Version="4.0.0-b16" />
+    <PackageReference Include="rebus.tests.contracts" Version="4.0.0-b16" />
   </ItemGroup>
 </Project>
