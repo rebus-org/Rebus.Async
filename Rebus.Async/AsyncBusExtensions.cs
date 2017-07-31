@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Rebus.Async;
 using Rebus.Bus;
 using Rebus.Messages;
+using Rebus.Transport;
+
 #pragma warning disable 4014
 
 namespace Rebus
@@ -30,6 +31,20 @@ namespace Rebus
         /// <param name="timeout">Optionally specifies the max time to wait for a reply. If this time is exceeded, a <see cref="TimeoutException"/> is thrown</param>
         /// <returns></returns>
         public static async Task<TReply> SendRequest<TReply>(this IBus bus, object request, Dictionary<string, string> optionalHeaders = null, TimeSpan? timeout = null)
+        {
+            var currentTransactionContext = AmbientTransactionContext.Current;
+            try
+            {
+                AmbientTransactionContext.SetCurrent(null);
+                return await InnerSendRequest<TReply>(bus, request, optionalHeaders, timeout);
+            }
+            finally
+            {
+                AmbientTransactionContext.SetCurrent(currentTransactionContext);
+            }
+        }
+
+        static async Task<TReply> InnerSendRequest<TReply>(this IBus bus, object request, Dictionary<string, string> optionalHeaders = null, TimeSpan? timeout = null)
         {
             var maxWaitTime = timeout ?? TimeSpan.FromSeconds(5);
             var messageId = $"{ReplyHandlerStep.SpecialMessageIdPrefix}:{Guid.NewGuid()}";

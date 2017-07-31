@@ -21,9 +21,10 @@
 
 * Update to Rebus 3
 
-## 5.0.0-b05
+## 5.0.0-b06
 
 * Update to Rebus 4
 * Add .NET Core support (netstandard 1.3)
 * Update deps to b16
 * Change reply correlation method to be reliable by basing it on the new `rbs2-in-reply-to` header
+* Dismantle ambient transaction context when blocking the callsite because it does not make sense to enlist request in a transaction
