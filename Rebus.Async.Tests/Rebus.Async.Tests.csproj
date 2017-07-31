@@ -35,7 +35,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Rebus.Async\Rebus.Async.csproj" />
     <PackageReference Include="nunit" Version="3.7.1" />
-    <PackageReference Include="rebus" Version="4.0.0-b16" />
-    <PackageReference Include="rebus.tests.contracts" Version="4.0.0-b16" />
+    <PackageReference Include="rebus" Version="4.0.0-b19" />
+    <PackageReference Include="rebus.tests.contracts" Version="4.0.0-b19" />
   </ItemGroup>
 </Project>
