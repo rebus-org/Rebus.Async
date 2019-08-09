@@ -47,7 +47,7 @@ namespace Rebus
         static async Task<TReply> InnerSendRequest<TReply>(this IBus bus, object request, Dictionary<string, string> optionalHeaders = null, TimeSpan? timeout = null)
         {
             var maxWaitTime = timeout ?? TimeSpan.FromSeconds(5);
-            var messageId = $"{ReplyHandlerStep.SpecialMessageIdPrefix}:{Guid.NewGuid()}";
+            var messageId = $"{ReplyHandlerStep.SpecialMessageIdPrefix}_{Guid.NewGuid()}";
 
             var headers = new Dictionary<string, string>
             {
