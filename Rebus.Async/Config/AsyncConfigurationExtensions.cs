@@ -3,7 +3,6 @@ using Rebus.Internals;
 using Rebus.Logging;
 using Rebus.Pipeline;
 using Rebus.Pipeline.Receive;
-using Rebus.Threading;
 
 namespace Rebus.Config
 {
@@ -16,15 +15,9 @@ namespace Rebus.Config
         /// Enables async/await-based request/reply whereby a request can be sent using the <see cref="AsyncBusExtensions.SendRequest{TReply}"/> method
         /// which can be awaited for a corresponding reply.
         /// </summary>
-        public static void EnableSynchronousRequestReply(this OptionsConfigurer configurer, int replyMaxAgeSeconds = 10)
+        public static void EnableSynchronousRequestReply(this OptionsConfigurer configurer)
         {
             if (configurer == null) throw new ArgumentNullException(nameof(configurer));
-
-            if (replyMaxAgeSeconds <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(replyMaxAgeSeconds), replyMaxAgeSeconds,
-                    "Please supply a positive value for the max age of a reply (i.e. how long to keep a reply until we give up on returning it)");
-            }
 
             configurer.Register(c =>
             {

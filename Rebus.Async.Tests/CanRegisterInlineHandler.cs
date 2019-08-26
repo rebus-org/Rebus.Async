@@ -29,7 +29,7 @@ namespace Rebus.Async.Tests
 
             _bus = Configure.With(_activator)
                 .Transport(t => t.UseInMemoryTransport(new InMemNetwork(), InputQueueName))
-                .Options(o => o.EnableSynchronousRequestReply(replyMaxAgeSeconds: 7))
+                .Options(o => o.EnableSynchronousRequestReply())
                 .Routing(r => r.TypeBased().Map<SomeRequest>(InputQueueName))
                 .Start();
         }
