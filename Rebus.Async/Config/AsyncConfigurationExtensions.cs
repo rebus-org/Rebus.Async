@@ -22,16 +22,15 @@ namespace Rebus.Config
 
             if (replyMaxAgeSeconds <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(replyMaxAgeSeconds), replyMaxAgeSeconds, 
+                throw new ArgumentOutOfRangeException(nameof(replyMaxAgeSeconds), replyMaxAgeSeconds,
                     "Please supply a positive value for the max age of a reply (i.e. how long to keep a reply until we give up on returning it)");
             }
-            
+
             configurer.Register(c =>
             {
                 var rebusLoggerFactory = c.Get<IRebusLoggerFactory>();
                 var asyncTaskFactory = c.Get<IAsyncTaskFactory>();
-                var replyMaxAge = TimeSpan.FromSeconds(replyMaxAgeSeconds);
-                var step = new ReplyHandlerStep(AsyncBusExtensions.Messages, rebusLoggerFactory, asyncTaskFactory, replyMaxAge);
+                var step = new ReplyHandlerStep(AsyncBusExtensions.Messages, rebusLoggerFactory, asyncTaskFactory);
                 return step;
             });
 

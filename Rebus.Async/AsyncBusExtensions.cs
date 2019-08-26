@@ -14,11 +14,11 @@ using Rebus.Transport;
 namespace Rebus
 {
     /// <summary>
-    /// Configuration and bus extepsions for enabling async/await-based request/reply
+    /// Configuration and bus extensions for enabling async/await-based request/reply
     /// </summary>
     public static class AsyncBusExtensions
     {
-        internal static readonly ConcurrentDictionary<string, TimedMessage> Messages = new ConcurrentDictionary<string, TimedMessage>();
+        internal static readonly ConcurrentDictionary<string, TaskCompletionSource<Message>> Messages = new ConcurrentDictionary<string, TaskCompletionSource<Message>>();
 
         /// <summary>
         /// Extension method on <see cref="IBus"/> that allows for asynchronously sending a request and dispatching
@@ -73,37 +73,27 @@ namespace Rebus
                 }
             }
 
-            var timedOut = false;
+            var tcs = new TaskCompletionSource<Message>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var cancellationToken = new CancellationTokenSource(maxWaitTime);
+            cancellationToken.Token
+                             .Register(() => tcs.SetCanceled(), useSynchronizationContext: false);
 
-            Task.Run(async () =>
-            {
-                await Task.Delay(maxWaitTime);
-                Volatile.Write(ref timedOut, true);
-            });
+            Messages.TryAdd(messageId, tcs);
 
             await bus.Send(request, headers);
 
-            TimedMessage reply;
-
-            while (!Messages.TryRemove(messageId, out reply))
-            {
-                await Task.Delay(10);
-                
-                if (Volatile.Read(ref timedOut))
-                {
-                    throw new TimeoutException($"Did not receive reply for request with in-reply-to ID '{messageId}' within {maxWaitTime} timeout");
-                }
-            }
-
-            var message = reply.Message;
-
             try
             {
-                return (TReply)message.Body;
+                var result = await tcs.Task;
+                if (result.Body is TReply reply) 
+                    return reply;
+
+                throw new InvalidCastException($"Could not return message {messageId} as a {typeof(TReply)}");
             }
-            catch (InvalidCastException exception)
+            catch (TaskCanceledException) when (cancellationToken.IsCancellationRequested)
             {
-                throw new InvalidCastException($"Could not return message {message.GetMessageLabel()} as a {typeof(TReply)}", exception);
+                throw new TimeoutException(
+                    $"Did not receive reply for request with in-reply-to ID '{messageId}' within {maxWaitTime} timeout");
             }
         }
     }
