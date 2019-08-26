@@ -35,5 +35,6 @@
 ## 6.0.0
 
 * Use `TaskCompletionSource` to trigger completion, because it's the right thing to do - thanks [SaltyDH]
+* Update target frameworks (.NET 4.6 and .NET Standard 2.0 respectively)
 
 [SaltyDH]: https://github.com/SaltyDH
