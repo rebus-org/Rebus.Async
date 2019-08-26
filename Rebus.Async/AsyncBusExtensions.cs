@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Rebus.Async;
 using Rebus.Bus;
+using Rebus.Internals;
 using Rebus.Messages;
 using Rebus.Transport;
+// ReSharper disable ArgumentsStyleLiteral
 
 #pragma warning disable 4014
 
@@ -73,27 +74,35 @@ namespace Rebus
                 }
             }
 
-            var tcs = new TaskCompletionSource<Message>(TaskCreationOptions.RunContinuationsAsynchronously);
-            var cancellationToken = new CancellationTokenSource(maxWaitTime);
-            cancellationToken.Token
-                             .Register(() => tcs.SetCanceled(), useSynchronizationContext: false);
+            var taskCompletionSource = new TaskCompletionSource<Message>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var task = taskCompletionSource.Task;
 
-            Messages.TryAdd(messageId, tcs);
-
-            await bus.Send(request, headers);
-
-            try
+            using (var cancellationTokenSource = new CancellationTokenSource(maxWaitTime))
             {
-                var result = await tcs.Task;
-                if (result.Body is TReply reply) 
-                    return reply;
+                var cancellationToken = cancellationTokenSource.Token;
 
-                throw new InvalidCastException($"Could not return message {messageId} as a {typeof(TReply)}");
-            }
-            catch (TaskCanceledException) when (cancellationToken.IsCancellationRequested)
-            {
-                throw new TimeoutException(
-                    $"Did not receive reply for request with in-reply-to ID '{messageId}' within {maxWaitTime} timeout");
+                cancellationToken.Register(() => taskCompletionSource.SetCanceled(), useSynchronizationContext: false);
+
+                Messages.TryAdd(messageId, taskCompletionSource);
+
+                await bus.Send(request, headers);
+
+                try
+                {
+                    var result = await task;
+
+                    if (result.Body is TReply reply)
+                    {
+                        return reply;
+                    }
+
+                    throw new InvalidCastException($"Could not return message {messageId} as a {typeof(TReply)}");
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    throw new TimeoutException(
+                        $"Did not receive reply for request with in-reply-to ID '{messageId}' within {maxWaitTime} timeout");
+                }
             }
         }
     }

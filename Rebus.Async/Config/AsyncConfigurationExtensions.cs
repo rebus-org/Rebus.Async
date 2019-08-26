@@ -1,5 +1,5 @@
 ﻿using System;
-using Rebus.Async;
+using Rebus.Internals;
 using Rebus.Logging;
 using Rebus.Pipeline;
 using Rebus.Pipeline.Receive;

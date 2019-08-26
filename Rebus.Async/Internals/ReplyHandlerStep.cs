@@ -7,9 +7,10 @@ using Rebus.Logging;
 using Rebus.Messages;
 using Rebus.Pipeline;
 using Rebus.Threading;
+
 #pragma warning disable 1998
 
-namespace Rebus.Async
+namespace Rebus.Internals
 {
     [StepDocumentation("Handles replies to requests sent with bus.SendRequest")]
     class ReplyHandlerStep : IIncomingStep, IInitializable, IDisposable
@@ -32,14 +33,18 @@ namespace Rebus.Async
             var message = context.Load<Message>();
 
             var hasInReplyToHeader = message.Headers.TryGetValue(Headers.InReplyTo, out var inReplyToMessageId);
+            
             if (hasInReplyToHeader)
             {
                 var isRequestReplyCorrelationId = inReplyToMessageId.StartsWith(SpecialMessageIdPrefix);
+            
                 if (isRequestReplyCorrelationId)
                 {
                     // it's the reply!
-                    if (_messages.TryGetValue(inReplyToMessageId, out var tcs))
-                        tcs.SetResult(message);
+                    if (_messages.TryRemove(inReplyToMessageId, out var taskCompletionSource))
+                    {
+                        taskCompletionSource.SetResult(message);
+                    }
 
                     return;
                 }
