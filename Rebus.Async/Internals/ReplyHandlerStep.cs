@@ -1,28 +1,24 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Threading.Tasks;
-using Rebus.Bus;
 using Rebus.Logging;
 using Rebus.Messages;
 using Rebus.Pipeline;
-using Rebus.Threading;
+
 #pragma warning disable 1998
 
 namespace Rebus.Internals
 {
     [StepDocumentation("Handles replies to requests sent with bus.SendRequest")]
-    class ReplyHandlerStep : IIncomingStep, IInitializable, IDisposable
+    class ReplyHandlerStep : IIncomingStep
     {
         readonly ConcurrentDictionary<string, TaskCompletionSource<Message>> _messages;
-        readonly IAsyncTask _cleanupTask;
         readonly ILog _log;
 
-        public ReplyHandlerStep(ConcurrentDictionary<string, TaskCompletionSource<Message>> messages, IRebusLoggerFactory rebusLoggerFactory, IAsyncTaskFactory asyncTaskFactory)
+        public ReplyHandlerStep(ConcurrentDictionary<string, TaskCompletionSource<Message>> messages, IRebusLoggerFactory rebusLoggerFactory)
         {
             _messages = messages ?? throw new ArgumentNullException(nameof(messages));
             _log = rebusLoggerFactory?.GetLogger<ReplyHandlerStep>() ?? throw new ArgumentNullException(nameof(rebusLoggerFactory));
-            _cleanupTask = asyncTaskFactory?.Create("CleanupAbandonedRepliesTask", CleanupAbandonedReplies) ?? throw new ArgumentNullException(nameof(asyncTaskFactory));
         }
 
         public const string SpecialMessageIdPrefix = "request-reply";
@@ -55,36 +51,6 @@ namespace Rebus.Internals
             }
 
             await next();
-        }
-
-        public void Initialize()
-        {
-            _cleanupTask.Start();
-        }
-
-        public void Dispose()
-        {
-            _cleanupTask.Dispose();
-        }
-
-        async Task CleanupAbandonedReplies()
-        {
-            var messageList = _messages.ToList();
-
-            var timedMessagesToRemove = messageList
-                .Where(m => m.Value.Task.IsCompleted)
-                .ToList();
-
-            if (!timedMessagesToRemove.Any()) return;
-
-            _log.Info(
-                "Found {0} tasks which have completed removing them now!",
-                timedMessagesToRemove.Count);
-
-            foreach (var messageToRemove in timedMessagesToRemove)
-            {
-                _messages.TryRemove(messageToRemove.Key, out _);
-            }
         }
     }
 }

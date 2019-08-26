@@ -37,4 +37,8 @@
 * Use `TaskCompletionSource` to trigger completion, because it's the right thing to do - thanks [SaltyDH]
 * Update target frameworks (.NET 4.6 and .NET Standard 2.0 respectively)
 
+## 6.0.1
+
+* Remove need for background cleaning, as all asynchronously awaited requests are guaranteed to either be completed or time out, in both cases removing the task completion source from the dictionary
+
 [SaltyDH]: https://github.com/SaltyDH

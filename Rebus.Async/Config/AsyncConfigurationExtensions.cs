@@ -29,8 +29,7 @@ namespace Rebus.Config
             configurer.Register(c =>
             {
                 var rebusLoggerFactory = c.Get<IRebusLoggerFactory>();
-                var asyncTaskFactory = c.Get<IAsyncTaskFactory>();
-                var step = new ReplyHandlerStep(AsyncBusExtensions.Messages, rebusLoggerFactory, asyncTaskFactory);
+                var step = new ReplyHandlerStep(AsyncBusExtensions.Messages, rebusLoggerFactory);
                 return step;
             });
 
