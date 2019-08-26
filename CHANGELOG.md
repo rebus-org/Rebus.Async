@@ -32,7 +32,7 @@
 
 * Use _ in special message ID to make the library usable with Amazon SQS, where : causes trouble
 
-## 5.0.2
+## 6.0.0
 
 * Use `TaskCompletionSource` to trigger completion, because it's the right thing to do - thanks [SaltyDH]
 

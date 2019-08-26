@@ -5,7 +5,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Rebus.Async.Tests</RootNamespace>
     <AssemblyName>Rebus.Async.Tests</AssemblyName>
-    <TargetFrameworks>net46;netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>net46;netcoreapp2.1</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -26,16 +26,12 @@
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <DefineConstants>NET45</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
-    <DefineConstants>NETSTANDARD1_6</DefineConstants>
-  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rebus.Async\Rebus.Async.csproj" />
-    <PackageReference Include="nunit" Version="3.7.1" />
-    <PackageReference Include="rebus" Version="4.0.0" />
-    <PackageReference Include="rebus.tests.contracts" Version="4.0.0" />
+    <PackageReference Include="microsoft.net.test.sdk" Version="16.2.0" />
+    <PackageReference Include="nunit" Version="3.12.0" />
+    <PackageReference Include="nunit3testadapter" Version="3.15.0" />
+    <PackageReference Include="rebus" Version="5.0.0" />
+    <PackageReference Include="rebus.tests.contracts" Version="5.0.0" />
   </ItemGroup>
 </Project>
