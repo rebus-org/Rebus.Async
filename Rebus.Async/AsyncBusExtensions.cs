@@ -81,7 +81,15 @@ namespace Rebus
             {
                 var cancellationToken = cancellationTokenSource.Token;
 
-                cancellationToken.Register(() => taskCompletionSource.SetCanceled(), useSynchronizationContext: false);
+                cancellationToken.Register(() =>
+                {
+                    // if we could successfully remove the completion source again, it means that the reply was NOT received...
+                    // therefore, it's safe to cancel the task
+                    if (Messages.TryRemove(messageId, out _))
+                    {
+                        taskCompletionSource.SetCanceled();
+                    }
+                }, useSynchronizationContext: false);
 
                 Messages.TryAdd(messageId, taskCompletionSource);
 
