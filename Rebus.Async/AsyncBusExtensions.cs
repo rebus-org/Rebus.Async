@@ -31,7 +31,7 @@ namespace Rebus
         /// <param name="optionalHeaders">Headers to be included in the request message</param>
         /// <param name="timeout">Optionally specifies the max time to wait for a reply. If this time is exceeded, a <see cref="TimeoutException"/> is thrown</param>
         /// <returns></returns>
-        public static async Task<TReply> SendRequest<TReply>(this IBus bus, object request, Dictionary<string, string> optionalHeaders = null, TimeSpan? timeout = null)
+        public static async Task<TReply> SendRequest<TReply>(this IBus bus, object request, IDictionary<string, string> optionalHeaders = null, TimeSpan? timeout = null)
         {
             var currentTransactionContext = AmbientTransactionContext.Current;
             try
@@ -45,7 +45,7 @@ namespace Rebus
             }
         }
 
-        static async Task<TReply> InnerSendRequest<TReply>(this IBus bus, object request, Dictionary<string, string> optionalHeaders = null, TimeSpan? timeout = null)
+        static async Task<TReply> InnerSendRequest<TReply>(this IBus bus, object request, IDictionary<string, string> optionalHeaders = null, TimeSpan? timeout = null)
         {
             var maxWaitTime = timeout ?? TimeSpan.FromSeconds(5);
             var messageId = $"{ReplyHandlerStep.SpecialMessageIdPrefix}_{Guid.NewGuid()}";
