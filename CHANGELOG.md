@@ -41,4 +41,9 @@
 
 * Remove need for background cleaning, as all asynchronously awaited requests are guaranteed to either be completed or time out, in both cases removing the task completion source from the dictionary
 
+## 7.0.0-b01
+
+* Update Rebus dependency to v6 - thanks [nativenolde]
+
+[nativenolde]: https://github.com/nativenolde
 [SaltyDH]: https://github.com/SaltyDH
