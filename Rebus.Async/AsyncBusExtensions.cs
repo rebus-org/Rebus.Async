@@ -30,14 +30,15 @@ namespace Rebus
         /// <param name="request">The request message</param>
         /// <param name="optionalHeaders">Headers to be included in the request message</param>
         /// <param name="timeout">Optionally specifies the max time to wait for a reply. If this time is exceeded, a <see cref="TimeoutException"/> is thrown</param>
+        /// <param name="externalCancellationToken">An external cancellation token from some outer context that cancels waiting for a reply</param>
         /// <returns></returns>
-        public static async Task<TReply> SendRequest<TReply>(this IBus bus, object request, IDictionary<string, string> optionalHeaders = null, TimeSpan? timeout = null)
+        public static async Task<TReply> SendRequest<TReply>(this IBus bus, object request, IDictionary<string, string> optionalHeaders = null, TimeSpan? timeout = null, CancellationToken externalCancellationToken = default)
         {
             var currentTransactionContext = AmbientTransactionContext.Current;
             try
             {
                 AmbientTransactionContext.SetCurrent(null);
-                return await InnerSendRequest<TReply>(bus, request, optionalHeaders, timeout);
+                return await InnerSendRequest<TReply>(bus, request, optionalHeaders, timeout, externalCancellationToken);
             }
             finally
             {
@@ -45,7 +46,7 @@ namespace Rebus
             }
         }
 
-        static async Task<TReply> InnerSendRequest<TReply>(this IBus bus, object request, IDictionary<string, string> optionalHeaders = null, TimeSpan? timeout = null)
+        static async Task<TReply> InnerSendRequest<TReply>(this IBus bus, object request, IDictionary<string, string> optionalHeaders, TimeSpan? timeout, CancellationToken externalCancellationToken)
         {
             var maxWaitTime = timeout ?? TimeSpan.FromSeconds(5);
             var messageId = $"{ReplyHandlerStep.SpecialMessageIdPrefix}_{Guid.NewGuid()}";
@@ -77,8 +78,10 @@ namespace Rebus
             var taskCompletionSource = new TaskCompletionSource<Message>(TaskCreationOptions.RunContinuationsAsynchronously);
             var task = taskCompletionSource.Task;
 
-            using (var cancellationTokenSource = new CancellationTokenSource(maxWaitTime))
+            using (var timeoutCancellationTokenSource = new CancellationTokenSource(maxWaitTime))
+            using (var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(timeoutCancellationTokenSource.Token, externalCancellationToken))
             {
+                var timeoutCancellationToken = timeoutCancellationTokenSource.Token;
                 var cancellationToken = cancellationTokenSource.Token;
 
                 cancellationToken.Register(() =>
@@ -106,7 +109,7 @@ namespace Rebus
 
                     throw new InvalidCastException($"Could not return message {messageId} as a {typeof(TReply)}");
                 }
-                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                catch (OperationCanceledException) when (timeoutCancellationToken.IsCancellationRequested)
                 {
                     throw new TimeoutException(
                         $"Did not receive reply for request with in-reply-to ID '{messageId}' within {maxWaitTime} timeout");
