@@ -38,7 +38,7 @@ namespace Rebus
             try
             {
                 AmbientTransactionContext.SetCurrent(null);
-                return await InnerSendRequest<TReply>(bus, request, optionalHeaders, timeout, externalCancellationToken);
+                return await InnerProcessRequest<TReply>((eventMessage, headers) => bus.Send(eventMessage, headers), request, optionalHeaders, timeout, externalCancellationToken);
             }
             finally
             {
@@ -46,7 +46,32 @@ namespace Rebus
             }
         }
 
-        static async Task<TReply> InnerSendRequest<TReply>(this IBus bus, object request, IDictionary<string, string> optionalHeaders, TimeSpan? timeout, CancellationToken externalCancellationToken)
+        /// <summary>
+        /// Extension method on <see cref="IBus"/> that allows for asynchronously publishing a request and dispatching
+        /// the received reply to the continuation.
+        /// </summary>
+        /// <typeparam name="TReply">Specifies the expected type of the reply. Can be any type compatible with the actually received reply</typeparam>
+        /// <param name="bus">The bus instance to use to publish the request</param>
+        /// <param name="request">The request message</param>
+        /// <param name="optionalHeaders">Headers to be included in the request message</param>
+        /// <param name="timeout">Optionally specifies the max time to wait for a reply. If this time is exceeded, a <see cref="TimeoutException"/> is thrown</param>
+        /// <param name="externalCancellationToken">An external cancellation token from some outer context that cancels waiting for a reply</param>
+        /// <returns></returns>
+        public static async Task<TReply> PublishRequest<TReply>(this IBus bus, object request, IDictionary<string, string> optionalHeaders = null, TimeSpan? timeout = null, CancellationToken externalCancellationToken = default)
+        {
+            var currentTransactionContext = AmbientTransactionContext.Current;
+            try
+            {
+                AmbientTransactionContext.SetCurrent(null);
+                return await InnerProcessRequest<TReply>((eventMessage, headers) => bus.Publish(eventMessage, headers), request, optionalHeaders, timeout, externalCancellationToken);
+            }
+            finally
+            {
+                AmbientTransactionContext.SetCurrent(currentTransactionContext);
+            }
+        }
+
+        static async Task<TReply> InnerProcessRequest<TReply>(Func<object, IDictionary<string, string>, Task> busAction, object request,  IDictionary<string, string> optionalHeaders, TimeSpan? timeout, CancellationToken externalCancellationToken)
         {
             var maxWaitTime = timeout ?? TimeSpan.FromSeconds(5);
             var messageId = $"{ReplyHandlerStep.SpecialMessageIdPrefix}_{Guid.NewGuid()}";
@@ -96,7 +121,7 @@ namespace Rebus
 
                 Messages.TryAdd(messageId, taskCompletionSource);
 
-                await bus.Send(request, headers);
+                await busAction(request, headers);
 
                 try
                 {
