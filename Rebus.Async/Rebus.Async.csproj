@@ -38,13 +38,6 @@
     <DocumentationFile>bin\Release\Rebus.Async.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Properties\AssemblyInfo.cs" />
-    <None Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="rebus" Version="6.5.0" />
   </ItemGroup>
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="$(ProjectDir)..\scripts\patch_assemblyinfo.cmd $(ProjectDir)" />
-  </Target>
 </Project>
