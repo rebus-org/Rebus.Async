@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Rebus.Activation;
-using Rebus.Bus;
 using Rebus.Config;
 using Rebus.Messages;
 using Rebus.Routing.TypeBased;
@@ -18,7 +17,7 @@ namespace Rebus.Async.Tests
     public class CanRegisterInlineHandler : FixtureBase
     {
         const string InputQueueName = "inline-handlers";
-        IBus _bus;
+        IBusStarter _busStarter;
         BuiltinHandlerActivator _activator;
 
         protected override void SetUp()
@@ -27,11 +26,11 @@ namespace Rebus.Async.Tests
 
             Using(_activator);
 
-            _bus = Configure.With(_activator)
+            _busStarter = Configure.With(_activator)
                 .Transport(t => t.UseInMemoryTransport(new InMemNetwork(), InputQueueName))
                 .Options(o => o.EnableSynchronousRequestReply())
                 .Routing(r => r.TypeBased().Map<SomeRequest>(InputQueueName))
-                .Start();
+                .Create();
         }
 
         [Test]
@@ -42,7 +41,8 @@ namespace Rebus.Async.Tests
                 await bus.Reply(new SomeReply());
             });
 
-            var reply = await _bus.SendRequest<SomeReply>(new SomeRequest());
+            var theBus = _busStarter.Start();
+            var reply = await theBus.SendRequest<SomeReply>(new SomeRequest());
 
             Assert.That(reply, Is.Not.Null);
         }
@@ -63,9 +63,10 @@ namespace Rebus.Async.Tests
                 await bus.Reply(new SomeReply());
             });
 
+            var theBus = _busStarter.Start();
             var aggregateException = Assert.Throws<AggregateException>(() =>
             {
-                var reply = _bus.SendRequest<SomeReply>(new SomeRequest(), timeout: TimeSpan.FromSeconds(2)).Result;
+                var reply = theBus.SendRequest<SomeReply>(new SomeRequest(), timeout: TimeSpan.FromSeconds(2)).Result;
             });
 
             Assert.That(aggregateException.InnerException, Is.TypeOf<TimeoutException>());
@@ -91,18 +92,19 @@ namespace Rebus.Async.Tests
 
                 await bus.Reply(new SomeReply());
             });
+            var theBus = _busStarter.Start();
 
             const string customHeaderKey = "x-custom-header";
             const string customHeaderValue = "it works!";
 
             var optionalHeaders = new Dictionary<string, string> { { customHeaderKey, customHeaderValue } };
 
-            await _bus.SendRequest<SomeReply>(new SomeRequest(), optionalHeaders);
+            await theBus.SendRequest<SomeReply>(new SomeRequest(), optionalHeaders);
 
             var dictionary = receivedHeaders.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             Assert.That(dictionary, Contains.Key(customHeaderKey));
-            Assert.That(dictionary[customHeaderKey], Is.EqualTo(customHeaderValue), 
+            Assert.That(dictionary[customHeaderKey], Is.EqualTo(customHeaderValue),
                 $"Did not find key-value-pair {customHeaderKey}={customHeaderValue} among the received headers");
         }
 
