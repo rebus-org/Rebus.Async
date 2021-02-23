@@ -1,11 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
- <PropertyGroup>
+  <PropertyGroup>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Rebus.Async.Tests</RootNamespace>
     <AssemblyName>Rebus.Async.Tests</AssemblyName>
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rebus.Async\Rebus.Async.csproj" />
