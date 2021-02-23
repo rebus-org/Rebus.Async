@@ -25,14 +25,16 @@ namespace Rebus.Async.Tests
         [Test]
         public async Task CanDoItInHandler()
         {
-            CreateBus("server").Handle<string>(async (bus, context, text) =>
+            var replier = CreateBus("server");
+            replier.Activator.Handle<string>(async (bus, context, text) =>
             {
                 await bus.Reply($"Got text: {text}");
             });
+            replier.BusStarter.Start();
 
             var requestor = CreateBus("requestor");
 
-            requestor.Handle<Request>(async (bus, context, request) =>
+            requestor.Activator.Handle<Request>(async (bus, context, request) =>
             {
                 var texts = new List<string>();
 
@@ -47,11 +49,12 @@ namespace Rebus.Async.Tests
 
                 await bus.Reply(new Response(texts));
             });
+            requestor.BusStarter.Start();
 
-            
             var client = CreateBus("client");
 
-            var response = await client.Bus.SendRequest<Response>(new Request(4));
+            var theBus = client.BusStarter.Start();
+            var response = await theBus.SendRequest<Response>(new Request(4));
 
             Assert.That(response.Texts.Count, Is.EqualTo(4));
         }
@@ -76,21 +79,31 @@ namespace Rebus.Async.Tests
             }
         }
 
-        BuiltinHandlerActivator CreateBus(string queueName)
+        class BusWrapper
+        {
+            public IBusStarter BusStarter;
+            public BuiltinHandlerActivator Activator;
+        }
+
+        BusWrapper CreateBus(string queueName)
         {
             var activator = new BuiltinHandlerActivator();
 
             Using(activator);
 
-            Configure.With(activator)
+            var busStarter = Configure.With(activator)
                 .Transport(t => t.UseInMemoryTransport(_network, queueName))
                 .Routing(r => r.TypeBased()
                     .Map<Request>("requestor")
                     .Map<string>("server"))
                 .Options(o => o.EnableSynchronousRequestReply())
-                .Start();
+                .Create();
 
-            return activator;
+            return new BusWrapper
+            {
+                BusStarter = busStarter,
+                Activator = activator,
+            };
         }
     }
 }
