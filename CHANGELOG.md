@@ -36,6 +36,11 @@
 * Update Rebus dependency to v6 - thanks [nativenolde]
 * Finalize Rebus dependency upgrade to v6 - thanks [rsivanov]
 
+## 7.1.0
+* Add ability to publish requests, treating the first reply as THE reply, ignoring additional replies – thanks [rsivanov]
+
+
+
 [nativenolde]: https://github.com/nativenolde
 [rsivanov]: https://github.com/rsivanov
 [SaltyDH]: https://github.com/SaltyDH
