@@ -39,7 +39,7 @@
 ## 7.1.0
 * Add ability to publish requests, treating the first reply as THE reply, ignoring additional replies – thanks [rsivanov]
 
-## UNRELEASED
+## 7.2.0
 * Add ability to pass custom Message Id's along with the request - thanks [nativenolde]
 
 [nativenolde]: https://github.com/nativenolde
