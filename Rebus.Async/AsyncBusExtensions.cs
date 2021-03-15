@@ -38,7 +38,7 @@ namespace Rebus
             try
             {
                 AmbientTransactionContext.SetCurrent(null);
-                return await InnerProcessRequest<TReply>((eventMessage, headers) => bus.Send(eventMessage, headers), request, optionalHeaders, timeout, externalCancellationToken);
+                return await InnerProcessRequest<TReply>(bus.Send, request, optionalHeaders, timeout, externalCancellationToken);
             }
             finally
             {
@@ -63,7 +63,7 @@ namespace Rebus
             try
             {
                 AmbientTransactionContext.SetCurrent(null);
-                return await InnerProcessRequest<TReply>((eventMessage, headers) => bus.Publish(eventMessage, headers), request, optionalHeaders, timeout, externalCancellationToken);
+                return await InnerProcessRequest<TReply>(bus.Publish, request, optionalHeaders, timeout, externalCancellationToken);
             }
             finally
             {
@@ -71,14 +71,25 @@ namespace Rebus
             }
         }
 
-        static async Task<TReply> InnerProcessRequest<TReply>(Func<object, IDictionary<string, string>, Task> busAction, object request,  IDictionary<string, string> optionalHeaders, TimeSpan? timeout, CancellationToken externalCancellationToken)
+        private static async Task<TReply> InnerProcessRequest<TReply>(Func<object, IDictionary<string, string>, Task> busAction, object request,  IDictionary<string, string> optionalHeaders, TimeSpan? timeout, CancellationToken externalCancellationToken)
         {
             var maxWaitTime = timeout ?? TimeSpan.FromSeconds(5);
-            var messageId = $"{ReplyHandlerStep.SpecialMessageIdPrefix}_{Guid.NewGuid()}";
+
+            if (TryGrabDesiredMessageId(optionalHeaders, out var messageId))
+            {
+                if (!messageId.StartsWith(ReplyHandlerStep.SpecialMessageIdPrefix))
+                {
+                    messageId = $"{ReplyHandlerStep.SpecialMessageIdPrefix}_{messageId}";
+                }
+            }
+            else
+            {
+                messageId = $"{ReplyHandlerStep.SpecialMessageIdPrefix}_{Guid.NewGuid()}";
+            }
 
             var headers = new Dictionary<string, string>
             {
-                {Headers.MessageId, messageId},
+                {Headers.MessageId, messageId}
             };
 
             if (optionalHeaders != null)
@@ -140,6 +151,18 @@ namespace Rebus
                         $"Did not receive reply for request with in-reply-to ID '{messageId}' within {maxWaitTime} timeout");
                 }
             }
+        }
+
+        private static bool TryGrabDesiredMessageId(IDictionary<string, string> optionalHeaders, out string messageId)
+        {
+            messageId = null;
+
+            if (optionalHeaders != null && optionalHeaders.TryGetValue(Headers.MessageId, out messageId))
+            {
+                optionalHeaders.Remove(Headers.MessageId);
+            }
+
+            return messageId != null;
         }
     }
 }
