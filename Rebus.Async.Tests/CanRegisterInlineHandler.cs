@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Rebus.Activation;
 using Rebus.Config;
+using Rebus.Internals;
 using Rebus.Messages;
 using Rebus.Routing.TypeBased;
 using Rebus.Tests.Contracts;
@@ -106,6 +107,27 @@ namespace Rebus.Async.Tests
             Assert.That(dictionary, Contains.Key(customHeaderKey));
             Assert.That(dictionary[customHeaderKey], Is.EqualTo(customHeaderValue),
                 $"Did not find key-value-pair {customHeaderKey}={customHeaderValue} among the received headers");
+        }
+
+        [Test]
+        public async Task CanPassCustomMessageIdHeaderAlongWithRequest()
+        {
+            string actualMessageId = null;
+            _activator.Handle<SomeRequest>(async (bus, context, request) =>
+            {
+                actualMessageId = context.Headers[Headers.MessageId];
+                await bus.Reply(new SomeReply());
+            });
+
+            var theBus = _busStarter.Start();
+
+            var optionalHeaders = new Dictionary<string, string> { { Headers.MessageId, "desired_message_id" } };
+
+            await theBus.SendRequest<SomeReply>(new SomeRequest(), optionalHeaders);
+
+            var expectedMessageId = $"{ReplyHandlerStep.SpecialMessageIdPrefix}_desired_message_id";
+
+            Assert.AreEqual(expectedMessageId, actualMessageId);
         }
 
         public class SomeRequest { }
