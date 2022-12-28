@@ -1,4 +1,4 @@
-image: Visual Studio 2019
+image: Visual Studio 2022
 
 shallow_clone: true
 
@@ -11,4 +11,6 @@ before_build:
 
 build_script:
   - dotnet build Rebus.Async -c Release 
-  - dotnet build Rebus.Async.Tests -c Release 
+
+test_script:
+  - dotnet test Rebus.Async.Tests -c Release 
