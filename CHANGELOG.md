@@ -42,7 +42,7 @@
 ## 7.2.0
 * Add ability to pass custom Message IDs along with the request - thanks [nativenolde]
 
-## 8.0.0
+## 8.0.1
 * Update to target Rebus 7
 
 [nativenolde]: https://github.com/nativenolde
