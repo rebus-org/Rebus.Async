@@ -1,22 +1,18 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
-  <PropertyGroup>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Rebus.Async.Tests</RootNamespace>
-    <AssemblyName>Rebus.Async.Tests</AssemblyName>
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Rebus.Async\Rebus.Async.csproj" />
-    <PackageReference Include="microsoft.net.test.sdk" Version="16.8.3" />
-    <PackageReference Include="nunit" Version="3.13.1" />
-    <PackageReference Include="nunit3testadapter" Version="3.17.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="rebus" Version="6.5.0" />
-    <PackageReference Include="rebus.tests.contracts" Version="6.4.0" />
-  </ItemGroup>
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFrameworks>net7.0</TargetFrameworks>
+		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+	</PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Rebus.Async\Rebus.Async.csproj" />
+		<PackageReference Include="microsoft.net.test.sdk" Version="17.4.1" />
+		<PackageReference Include="nunit" Version="3.13.3" />
+		<PackageReference Include="nunit3testadapter" Version="4.3.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="rebus" Version="7.0.0" />
+		<PackageReference Include="rebus.tests.contracts" Version="7.0.0" />
+	</ItemGroup>
 </Project>

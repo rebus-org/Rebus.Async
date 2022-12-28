@@ -40,7 +40,10 @@
 * Add ability to publish requests, treating the first reply as THE reply, ignoring additional replies – thanks [rsivanov]
 
 ## 7.2.0
-* Add ability to pass custom Message Id's along with the request - thanks [nativenolde]
+* Add ability to pass custom Message IDs along with the request - thanks [nativenolde]
+
+## 8.0.0
+* Update to target Rebus 7
 
 [nativenolde]: https://github.com/nativenolde
 [rsivanov]: https://github.com/rsivanov
