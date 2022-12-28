@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Rebus.Activation;
@@ -34,7 +33,7 @@ public class DoesNotDeadlock : FixtureBase
 
         var requestor = CreateBus("requestor");
 
-        requestor.Activator.Handle<Request>(async (bus, context, request) =>
+        requestor.Activator.Handle<Request>(async (bus, _, request) =>
         {
             var texts = new List<string>();
 
@@ -73,10 +72,7 @@ public class DoesNotDeadlock : FixtureBase
     {
         public IReadOnlyCollection<string> Texts { get; }
 
-        public Response(IEnumerable<string> texts)
-        {
-            Texts = texts.ToList();
-        }
+        public Response(IReadOnlyCollection<string> texts) => Texts = texts;
     }
 
     class BusWrapper
