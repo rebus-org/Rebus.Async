@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Rebus.Bus;
+using Rebus.Bus.Advanced;
 using Rebus.Internals;
 using Rebus.Messages;
 using Rebus.Transport;
@@ -34,11 +35,17 @@ public static class AsyncBusExtensions
     /// <returns></returns>
     public static async Task<TReply> SendRequest<TReply>(this IBus bus, object request, IDictionary<string, string> optionalHeaders = null, TimeSpan? timeout = null, CancellationToken externalCancellationToken = default)
     {
+        if (bus == null) throw new ArgumentNullException(nameof(bus));
+        if (request == null) throw new ArgumentNullException(nameof(request));
+
         var currentTransactionContext = AmbientTransactionContext.Current;
         try
         {
             AmbientTransactionContext.SetCurrent(null);
-            return await InnerProcessRequest<TReply>(bus.Send, request, optionalHeaders, timeout, externalCancellationToken);
+
+            Task BusAction(object obj, IDictionary<string, string> headers) => bus.Send(obj, headers);
+
+            return await InnerProcessRequest<TReply>(BusAction, request, optionalHeaders, timeout, externalCancellationToken);
         }
         finally
         {
@@ -47,23 +54,29 @@ public static class AsyncBusExtensions
     }
 
     /// <summary>
-    /// Extension method on <see cref="IBus"/> that allows for asynchronously publishing a request and dispatching
+    /// Extension method on <see cref="IBus"/> that allows for asynchronously sending a request and dispatching
     /// the received reply to the continuation.
     /// </summary>
     /// <typeparam name="TReply">Specifies the expected type of the reply. Can be any type compatible with the actually received reply</typeparam>
-    /// <param name="bus">The bus instance to use to publish the request</param>
+    /// <param name="routingApi">The routing API to use when sending the request</param>
+    /// <param name="destinationAddress">The destination queue to send the request to</param>
     /// <param name="request">The request message</param>
     /// <param name="optionalHeaders">Headers to be included in the request message</param>
     /// <param name="timeout">Optionally specifies the max time to wait for a reply. If this time is exceeded, a <see cref="TimeoutException"/> is thrown</param>
     /// <param name="externalCancellationToken">An external cancellation token from some outer context that cancels waiting for a reply</param>
     /// <returns></returns>
-    public static async Task<TReply> PublishRequest<TReply>(this IBus bus, object request, IDictionary<string, string> optionalHeaders = null, TimeSpan? timeout = null, CancellationToken externalCancellationToken = default)
+    public static async Task<TReply> SendRequest<TReply>(this IRoutingApi routingApi, string destinationAddress, object request, IDictionary<string, string> optionalHeaders = null, TimeSpan? timeout = null, CancellationToken externalCancellationToken = default)
     {
+        if (routingApi == null) throw new ArgumentNullException(nameof(routingApi));
+        if (request == null) throw new ArgumentNullException(nameof(request));
         var currentTransactionContext = AmbientTransactionContext.Current;
         try
         {
             AmbientTransactionContext.SetCurrent(null);
-            return await InnerProcessRequest<TReply>(bus.Publish, request, optionalHeaders, timeout, externalCancellationToken);
+
+            Task BusAction(object obj, IDictionary<string, string> headers) => routingApi.Send(destinationAddress, obj, headers);
+
+            return await InnerProcessRequest<TReply>(BusAction, request, optionalHeaders, timeout, externalCancellationToken);
         }
         finally
         {
@@ -71,7 +84,7 @@ public static class AsyncBusExtensions
         }
     }
 
-    private static async Task<TReply> InnerProcessRequest<TReply>(Func<object, IDictionary<string, string>, Task> busAction, object request,  IDictionary<string, string> optionalHeaders, TimeSpan? timeout, CancellationToken externalCancellationToken)
+    static async Task<TReply> InnerProcessRequest<TReply>(Func<object, IDictionary<string, string>, Task> busAction, object request, IDictionary<string, string> optionalHeaders, TimeSpan? timeout, CancellationToken externalCancellationToken)
     {
         var maxWaitTime = timeout ?? TimeSpan.FromSeconds(5);
 
