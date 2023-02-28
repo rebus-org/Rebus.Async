@@ -14,7 +14,7 @@ namespace Rebus.Async.Tests;
 [TestFixture]
 public class DoesNotDeadlock : FixtureBase
 {
-    readonly InMemNetwork _network = new InMemNetwork(true);
+    readonly InMemNetwork _network = new(true);
 
     protected override void SetUp()
     {

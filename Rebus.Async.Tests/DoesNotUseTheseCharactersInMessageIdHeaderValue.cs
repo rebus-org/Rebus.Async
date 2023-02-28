@@ -50,7 +50,7 @@ public class DoesNotUseTheseCharactersInMessageIdHeaderValue : FixtureBase
     class ThrowOnInvalidCharactersTransportDecorator : ITransport
     {
         readonly ITransport _transport;
-        readonly Regex _validMessageIdRegex = new Regex("^[a-zA-Z0-9\\-_]+$");
+        readonly Regex _validMessageIdRegex = new("^[a-zA-Z0-9\\-_]+$");
 
         public ThrowOnInvalidCharactersTransportDecorator(ITransport transport)
         {
