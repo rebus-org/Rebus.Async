@@ -45,6 +45,9 @@
 ## 8.0.1
 * Update to target Rebus 7
 
+## 9.0.0
+* Add API to enable explicit routing of requests as an extension on `IRoutingApi`
+
 [nativenolde]: https://github.com/nativenolde
 [rsivanov]: https://github.com/rsivanov
 [SaltyDH]: https://github.com/SaltyDH

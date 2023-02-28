@@ -2,11 +2,8 @@
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
 		<LangVersion>10</LangVersion>
-		<AppDesignerFolder>Properties</AppDesignerFolder>
 		<RootNamespace>Rebus</RootNamespace>
-		<AssemblyName>Rebus.Async</AssemblyName>
 		<TargetFrameworks>netstandard2.0</TargetFrameworks>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<Authors>mookid8000</Authors>
 		<PackageProjectUrl>https://rebus.fm/what-is-rebus/</PackageProjectUrl>
 		<Copyright>Copyright Rebus FM ApS 2012</Copyright>

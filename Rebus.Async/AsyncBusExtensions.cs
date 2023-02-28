@@ -166,7 +166,7 @@ public static class AsyncBusExtensions
         }
     }
 
-    private static bool TryGrabDesiredMessageId(IDictionary<string, string> optionalHeaders, out string messageId)
+    static bool TryGrabDesiredMessageId(IDictionary<string, string> optionalHeaders, out string messageId)
     {
         messageId = null;
 
