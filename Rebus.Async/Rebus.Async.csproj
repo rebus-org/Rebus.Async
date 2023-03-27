@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
-		<LangVersion>10</LangVersion>
+		<LangVersion>11</LangVersion>
 		<RootNamespace>Rebus</RootNamespace>
 		<TargetFrameworks>netstandard2.0</TargetFrameworks>
 		<Authors>mookid8000</Authors>
@@ -15,7 +15,7 @@
 		<PackageIcon>little_rebusbus2_copy-500x500.png</PackageIcon>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="rebus" Version="[7, 8)" />
+		<PackageReference Include="rebus" Version="[8.0.0-alpha01, 9)" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="..\artwork\little_rebusbus2_copy-500x500.png">
